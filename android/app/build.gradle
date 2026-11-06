@@ -25,20 +25,10 @@ android {
     signingConfigs {
         release {
             // Chữ ký lấy từ GitHub Secrets (không lưu trong repo) để bản mới cài đè được bản cũ
-            def ks = file('mcalc.jks')
-            if (ks.exists()) {
-                storeFile ks
-                storePassword System.getenv('MCALC_KS_PASS')
-                keyAlias 'mcalc'
-                keyPassword System.getenv('MCALC_KS_PASS')
-            } else {
-                // chưa có chữ ký riêng -> dùng chữ ký debug để vẫn build thử được
-                def dbg = signingConfigs.getByName('debug')
-                storeFile dbg.storeFile
-                storePassword dbg.storePassword
-                keyAlias dbg.keyAlias
-                keyPassword dbg.keyPassword
-            }
+            storeFile file('mcalc.jks')
+            storePassword System.getenv('MCALC_KS_PASS')
+            keyAlias 'mcalc'
+            keyPassword System.getenv('MCALC_KS_PASS')
         }
     }
     buildTypes {

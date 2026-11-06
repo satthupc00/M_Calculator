@@ -50,15 +50,19 @@ jobs:
             echo "$KS_B64" | base64 -d > android/app/mcalc.jks
             echo "signed=true" >> "$GITHUB_OUTPUT"
           else
-            echo "::warning::Chưa có secret MCALC_KEYSTORE_B64 - chỉ build thử, không tạo Release"
+            echo "::warning::Chưa có secret MCALC_KEYSTORE_B64 - chỉ build thử bằng chữ ký tạm, không tạo Release"
+            keytool -genkeypair -keystore android/app/mcalc.jks -alias mcalc -keyalg RSA -keysize 2048 -validity 365 \
+              -storepass temp-build-only -keypass temp-build-only -dname "CN=Temp" -noprompt
+            echo "MCALC_KS_PASS=temp-build-only" >> "$GITHUB_ENV"
             echo "signed=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Build APK
         working-directory: android
         env:
-          MCALC_KS_PASS: ${{ secrets.MCALC_KS_PASS }}
+          KS_PASS_SECRET: ${{ secrets.MCALC_KS_PASS }}
         run: |
+          if [ -n "$KS_PASS_SECRET" ]; then export MCALC_KS_PASS="$KS_PASS_SECRET"; fi
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
 

@@ -1,0 +1,9 @@
+{
+  "appId": "com.mondiro.mcalc",
+  "appName": "M Calc",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#1F2126",
+    "adjustMarginsForEdgeToEdge": "force"
+  }
+}

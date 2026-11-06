@@ -1,0 +1,96 @@
+name: Build & Release APK
+
+on:
+  push:
+    branches: ['**']
+    paths-ignore: ['design/**', '**.md']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Cài thư viện
+        run: npm ci
+
+      - name: Kiểm tra bộ tính toán
+        run: node tests/engine.test.js
+
+      - name: Chuẩn bị web + đồng bộ Android
+        run: |
+          node scripts/stamp-version.js
+          npx cap sync android
+
+      - name: Lấy chữ ký app từ Secrets
+        id: sign
+        env:
+          KS_B64: ${{ secrets.MCALC_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$KS_B64" ]; then
+            echo "$KS_B64" | base64 -d > android/app/mcalc.jks
+            echo "signed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Chưa có secret MCALC_KEYSTORE_B64 - chỉ build thử, không tạo Release"
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build APK
+        working-directory: android
+        env:
+          MCALC_KS_PASS: ${{ secrets.MCALC_KS_PASS }}
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Đặt tên file
+        id: meta
+        run: |
+          VER=$(node -p "require('./package.json').version")
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+          cp android/app/build/outputs/apk/release/app-release.apk "M-Calc-v$VER.apk"
+          node -e "
+            const w=require('./www/whatsnew.json');
+            const g=(t,a)=>a&&a.length?'### '+t+'\n'+a.map(x=>'- '+x).join('\n')+'\n\n':'';
+            require('fs').writeFileSync('release-notes.md', g('Mới',w.new)+g('Cải thiện',w.improved)+g('Sửa lỗi',w.fixed));
+          "
+          if git ls-remote --exit-code --tags origin "refs/tags/v$VER" >/dev/null; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M-Calc-v${{ steps.meta.outputs.version }}
+          path: M-Calc-v${{ steps.meta.outputs.version }}.apk
+
+      - name: Tạo GitHub Release (khi có version mới)
+        if: steps.meta.outputs.release == 'true' && steps.sign.outputs.signed == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.meta.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          name: M Calc v${{ steps.meta.outputs.version }}
+          body_path: release-notes.md
+          files: M-Calc-v${{ steps.meta.outputs.version }}.apk
+          make_latest: true

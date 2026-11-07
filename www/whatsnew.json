@@ -1,12 +1,9 @@
 {
-  "version": "1.2.0",
+  "version": "1.2.1",
   "date": "2026-11-07",
-  "new": [
-    "Đổi tiền 2 chiều: chạm vào khung đổi tiền ở góc trên để chuyển giữa nhập Tệ → xem tiền Việt và nhập tiền Việt → xem Tệ"
-  ],
+  "new": [],
   "improved": [
-    "Bật/tắt đổi tiền không còn hiện thông báo che bàn phím",
-    "Nút đổi tiền hiện ¥ hoặc ₫ theo loại tiền đang nhập"
+    "Logo mới cho M Calc: máy tính tông đen đỏ"
   ],
   "fixed": []
 }

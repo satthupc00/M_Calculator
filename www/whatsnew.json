@@ -1,14 +1,12 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "date": "2026-11-07",
   "new": [
-    "Chế độ đổi tiền: bấm nút ¥ để nhập theo Nhân dân tệ, số tiền Việt hiện ở góc trên màn hình",
-    "Chỉnh được tỷ giá trong Cài đặt (mặc định 1 ¥ = 4,000 ₫)",
-    "Phép tính lưu ở chế độ đổi tiền có kèm số tiền Việt trong lịch sử",
-    "Phím 000 để gõ nhanh số tiền lớn"
+    "Đổi tiền 2 chiều: chạm vào khung đổi tiền ở góc trên để chuyển giữa nhập Tệ → xem tiền Việt và nhập tiền Việt → xem Tệ"
   ],
   "improved": [
-    "Bỏ phím +/− cho bàn phím gọn hơn"
+    "Bật/tắt đổi tiền không còn hiện thông báo che bàn phím",
+    "Nút đổi tiền hiện ¥ hoặc ₫ theo loại tiền đang nhập"
   ],
   "fixed": []
 }

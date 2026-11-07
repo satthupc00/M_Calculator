@@ -22,6 +22,7 @@
   let vibrateOn = store.get('vibrate', true);
   // chế độ đổi tiền: nhập Nhân dân tệ, hiện tiền Việt ở góc trên
   let fxOn = store.get('fxOn', false);
+  let fxDir = store.get('fxDir', 'cny');          // 'cny': nhập Tệ -> xem VND · 'vnd': nhập VND -> xem Tệ
   let fxRate = store.get('fxRate', 4000);
 
   /* ---------- bàn phím ---------- */
@@ -176,26 +177,37 @@
     updateFx(cur.ok ? cur.value : null);
   }
 
-  /* ---------- đổi tiền ¥ -> ₫ ---------- */
-  const vnd = v => E.formatNumber(Math.round(v * fxRate)) + ' ₫';
+  /* ---------- đổi tiền ¥ <-> ₫ ---------- */
+  // đổi 1 số theo chiều dir, trả về chuỗi đã định dạng kèm ký hiệu tiền
+  function convert(v, dir, rate) {
+    if (dir === 'vnd') return '¥ ' + E.formatNumber(Math.round(v / rate * 100) / 100);
+    return E.formatNumber(Math.round(v * rate)) + ' ₫';
+  }
   function updateFx(v) {
     $('fx').hidden = !fxOn;
     app.classList.toggle('fx-on', fxOn);
-    $('btnFx').classList.toggle('on', fxOn);
+    app.dataset.fx = fxDir;
+    const b = $('btnFx');
+    b.classList.toggle('on', fxOn);
+    b.textContent = fxDir === 'vnd' ? '₫' : '¥';
     if (!fxOn) return;
-    if (v != null) $('fxVal').textContent = vnd(v);
+    if (v != null) $('fxVal').textContent = convert(v, fxDir, fxRate);
+    $('fxTag').textContent = fxDir === 'vnd' ? 'TỆ' : 'VND';
     $('fxRateTxt').textContent = '1 ¥ = ' + E.formatNumber(fxRate) + ' ₫';
   }
-  $('btnFx').onclick = () => {
-    fxOn = !fxOn; store.set('fxOn', fxOn); buzz();
+  // nút ¥: bật/tắt chế độ đổi tiền (không hiện thông báo để khỏi che bàn phím)
+  $('btnFx').onclick = () => { fxOn = !fxOn; store.set('fxOn', fxOn); buzz(); render(); };
+  // chạm vào khung đổi tiền: đảo chiều ¥ -> ₫ / ₫ -> ¥
+  $('fx').onclick = () => {
+    fxDir = fxDir === 'vnd' ? 'cny' : 'vnd'; store.set('fxDir', fxDir); buzz();
+    $('fx').animate([{ transform: 'scale(.94)' }, { transform: 'scale(1)' }], { duration: 260, easing: 'cubic-bezier(.34,1.56,.64,1)' });
     render();
-    toast(fxOn ? 'Đã bật đổi tiền: nhập Tệ (¥), xem tiền Việt ở trên' : 'Đã tắt đổi tiền');
   };
 
   /* ---------- lịch sử ---------- */
   function addHistory(e, v) {
     const h = { e, v, t: Date.now() };
-    if (fxOn) h.fx = fxRate;
+    if (fxOn) { h.fx = fxRate; h.dir = fxDir; }
     history.unshift(h);
     if (history.length > MAX_HIST) history.length = MAX_HIST;
     store.set('history', history);
@@ -222,7 +234,7 @@
     }
     hlist.innerHTML = '<div class="hint">Chạm để dùng lại · Vuốt ngang để xoá</div>' + history.map((h, i) =>
       `<div class="hi-wrap" data-i="${i}"><div class="hi-bg">${TRASH}${TRASH}</div>
-        <div class="hi"><div class="t">${when(h.t)}</div><div class="e">${markup(h.e)}</div><div class="r">= ${h.fx ? '¥ ' : ''}${E.formatNumber(h.v)}</div>${h.fx ? `<div class="v">≈ ${E.formatNumber(Math.round(h.v * h.fx))} ₫</div>` : ''}</div></div>`).join('');
+        <div class="hi"><div class="t">${when(h.t)}</div><div class="e">${markup(h.e)}</div><div class="r">= ${h.fx ? (h.dir === 'vnd' ? '₫ ' : '¥ ') : ''}${E.formatNumber(h.v)}</div>${h.fx ? `<div class="v">≈ ${convert(h.v, h.dir || 'cny', h.fx)}</div>` : ''}</div></div>`).join('');
   }
 
   // vuốt để xoá (Pointer Events)

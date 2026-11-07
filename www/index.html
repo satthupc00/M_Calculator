@@ -31,10 +31,11 @@
     </div>
 
     <div class="display" id="display">
-      <div class="fx" id="fx" hidden>
-        <div class="fx-top"><span class="fx-tag">VND</span><span class="fx-rate" id="fxRateTxt"></span></div>
-        <b class="fx-val" id="fxVal">0 ₫</b>
-      </div>
+      <button class="fx" id="fx" type="button" hidden title="Chạm để đổi chiều ¥ ⇄ ₫" aria-label="Kết quả đổi tiền, chạm để đổi chiều">
+        <span class="fx-top"><span class="fx-tag" id="fxTag">VND</span><span class="fx-rate" id="fxRateTxt"></span></span>
+        <span class="fx-row"><b class="fx-val" id="fxVal">0 ₫</b>
+          <svg class="fx-swap" viewBox="0 0 24 24"><path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/></svg></span>
+      </button>
       <div class="expr" id="expr" aria-live="polite"></div>
       <div class="result" id="result"></div>
     </div>
@@ -46,7 +47,7 @@
       <button class="ibtn" id="btnCopy" type="button" title="Sao chép kết quả" aria-label="Sao chép kết quả">
         <svg viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>
       </button>
-      <button class="ibtn fxbtn" id="btnFx" type="button" title="Đổi tiền Tệ → VND" aria-label="Chế độ đổi tiền Tệ sang tiền Việt">¥</button>
+      <button class="ibtn fxbtn" id="btnFx" type="button" title="Bật/tắt đổi tiền" aria-label="Bật hoặc tắt chế độ đổi tiền">¥</button>
       <span class="sp"></span>
       <button class="ibtn" id="btnBack" type="button" title="Xoá 1 ký tự (giữ để xoá hết)" aria-label="Xoá 1 ký tự">
         <svg viewBox="0 0 24 24"><path d="M21 5H9l-7 7 7 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z"/><path d="m17 9-6 6M11 9l6 6"/></svg>

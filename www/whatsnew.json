@@ -1,14 +1,14 @@
 {
-  "version": "1.0.0",
-  "date": "2026-11-06",
+  "version": "1.1.0",
+  "date": "2026-11-07",
   "new": [
-    "Ra mắt M Calc: máy tính giao diện tối, số to rõ, tối ưu cho Galaxy Z Fold 7",
-    "Màn ngoài: bàn phím gọn, lịch sử trượt lên khi bấm biểu tượng đồng hồ",
-    "Màn trong: lịch sử luôn hiện bên trái, thêm phím khoa học √, x², π, xʸ, n!",
-    "Xem trước kết quả ngay khi đang gõ phép tính",
-    "Lưu tới 200 phép tính, chạm để dùng lại, vuốt ngang để xoá (có Hoàn tác)",
-    "Tự kiểm tra và cài bản cập nhật mới"
+    "Chế độ đổi tiền: bấm nút ¥ để nhập theo Nhân dân tệ, số tiền Việt hiện ở góc trên màn hình",
+    "Chỉnh được tỷ giá trong Cài đặt (mặc định 1 ¥ = 4,000 ₫)",
+    "Phép tính lưu ở chế độ đổi tiền có kèm số tiền Việt trong lịch sử",
+    "Phím 000 để gõ nhanh số tiền lớn"
   ],
-  "improved": [],
+  "improved": [
+    "Bỏ phím +/− cho bàn phím gọn hơn"
+  ],
   "fixed": []
 }

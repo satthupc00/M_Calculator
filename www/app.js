@@ -20,6 +20,9 @@
   let justEval = false;
   let history = store.get('history', []);
   let vibrateOn = store.get('vibrate', true);
+  // chế độ đổi tiền: nhập Nhân dân tệ, hiện tiền Việt ở góc trên
+  let fxOn = store.get('fxOn', false);
+  let fxRate = store.get('fxRate', 4000);
 
   /* ---------- bàn phím ---------- */
   const KEYS = [
@@ -27,10 +30,10 @@
     ['x<sup>2</sup>', 'fn sci', 'sq'], ['7'], ['8'], ['9'], ['×', 'op'],
     ['π', 'fn sci', 'π'], ['4'], ['5'], ['6'], ['−', 'op'],
     ['x<sup>y</sup>', 'fn sci', '^'], ['1'], ['2'], ['3'], ['+', 'op'],
-    ['n!', 'fn sci', '!'], ['+/−', 'sm', 'neg'], ['0'], ['.'], ['=', 'eq']
+    ['n!', 'fn sci', '!'], ['000', 'sm', '000'], ['0'], ['.'], ['=', 'eq']
   ];
   const LABEL = { '√': 'Căn bậc hai', C: 'Xoá hết', '()': 'Ngoặc', '%': 'Phần trăm', '÷': 'Chia', sq: 'Bình phương', '×': 'Nhân', 'π': 'Pi',
-    '−': 'Trừ', '^': 'Luỹ thừa', '+': 'Cộng', '!': 'Giai thừa', neg: 'Đổi dấu', '.': 'Dấu thập phân', '=': 'Bằng' };
+    '−': 'Trừ', '^': 'Luỹ thừa', '+': 'Cộng', '!': 'Giai thừa', '000': 'Ba số 0', '.': 'Dấu thập phân', '=': 'Bằng' };
   pad.innerHTML = KEYS.map(([label, cls, key]) => {
     const k = key || label;
     return `<button type="button" class="k ${cls || ''}" data-k="${k}" aria-label="${LABEL[k] || k}"><span>${label}</span></button>`;
@@ -92,11 +95,11 @@
       const open = (expr.match(/\(/g) || []).length - (expr.match(/\)/g) || []).length;
       if (open > 0 && endsOperand()) expr += ')';
       else expr += endsOperand() ? '×(' : '(';
-    } else if (k === 'neg') {
-      const m = expr.match(/(\(−)?([\d.]+|π)$/);
-      if (m) expr = expr.slice(0, -m[0].length) + (m[1] ? m[2] : '(−' + m[2]);
-      else if (!expr || isOp(L) || L === '(') expr += '(−';
-      else return shake();
+    } else if (k === '000') {
+      const n = curNumber();
+      if (!n || n === '0' || /[)%!π]$/.test(expr)) return shake();   // 000 chỉ đi sau một số
+      if (n.replace('.', '').length + 3 > 15) return shake();
+      expr += '000';
     } else if (k === 'C') {
       expr = '';
     } else if (k === '=') {
@@ -115,11 +118,13 @@
       return shake();
     }
     const hasCalc = /[+−×÷^%!√π(]/.test(expr.replace(/^−/, ''));
-    if (hasCalc) addHistory(expr, r.value);
+    if (justEval && !hasCalc) return;                       // bấm = lặp lại: không lưu trùng
+    if (hasCalc || fxOn) addHistory(expr, r.value);
     const s = String(r.value);
     expr = s.includes('e') ? '' : s.replace('-', '−');
     justEval = true;
     render(s.includes('e') ? E.formatNumber(r.value) : null);
+    updateFx(r.value);
     resEl.textContent = '';
     exprEl.classList.remove('flash'); void exprEl.offsetWidth;
     resEl.className = 'result';
@@ -167,11 +172,31 @@
       const r = E.evaluate(expr, true);
       resEl.textContent = r.ok ? E.formatNumber(r.value) : '';
     } else resEl.textContent = '';
+    const cur = expr ? E.evaluate(expr, true) : { ok: true, value: 0 };
+    updateFx(cur.ok ? cur.value : null);
   }
+
+  /* ---------- đổi tiền ¥ -> ₫ ---------- */
+  const vnd = v => E.formatNumber(Math.round(v * fxRate)) + ' ₫';
+  function updateFx(v) {
+    $('fx').hidden = !fxOn;
+    app.classList.toggle('fx-on', fxOn);
+    $('btnFx').classList.toggle('on', fxOn);
+    if (!fxOn) return;
+    if (v != null) $('fxVal').textContent = vnd(v);
+    $('fxRateTxt').textContent = '1 ¥ = ' + E.formatNumber(fxRate) + ' ₫';
+  }
+  $('btnFx').onclick = () => {
+    fxOn = !fxOn; store.set('fxOn', fxOn); buzz();
+    render();
+    toast(fxOn ? 'Đã bật đổi tiền: nhập Tệ (¥), xem tiền Việt ở trên' : 'Đã tắt đổi tiền');
+  };
 
   /* ---------- lịch sử ---------- */
   function addHistory(e, v) {
-    history.unshift({ e, v, t: Date.now() });
+    const h = { e, v, t: Date.now() };
+    if (fxOn) h.fx = fxRate;
+    history.unshift(h);
     if (history.length > MAX_HIST) history.length = MAX_HIST;
     store.set('history', history);
     renderHistory();
@@ -197,7 +222,7 @@
     }
     hlist.innerHTML = '<div class="hint">Chạm để dùng lại · Vuốt ngang để xoá</div>' + history.map((h, i) =>
       `<div class="hi-wrap" data-i="${i}"><div class="hi-bg">${TRASH}${TRASH}</div>
-        <div class="hi"><div class="t">${when(h.t)}</div><div class="e">${markup(h.e)}</div><div class="r">= ${E.formatNumber(h.v)}</div></div></div>`).join('');
+        <div class="hi"><div class="t">${when(h.t)}</div><div class="e">${markup(h.e)}</div><div class="r">= ${h.fx ? '¥ ' : ''}${E.formatNumber(h.v)}</div>${h.fx ? `<div class="v">≈ ${E.formatNumber(Math.round(h.v * h.fx))} ₫</div>` : ''}</div></div>`).join('');
   }
 
   // vuốt để xoá (Pointer Events)
@@ -332,6 +357,12 @@
     if (e.target === m || e.target.closest('[data-close]')) closeModals();
   }));
   $('btnSettings').onclick = () => openModal('mSettings');
+  $('optRate').value = fxRate;
+  $('optRate').onchange = e => {
+    const r = parseFloat(String(e.target.value).replace(/[^\d.]/g, ''));
+    if (r > 0) { fxRate = r; store.set('fxRate', fxRate); render(); toast('Tỷ giá mới: 1 ¥ = ' + E.formatNumber(fxRate) + ' ₫'); }
+    else e.target.value = fxRate;
+  };
   $('optVibrate').checked = vibrateOn;
   $('optVibrate').onchange = e => { vibrateOn = e.target.checked; store.set('vibrate', vibrateOn); };
 

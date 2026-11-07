@@ -31,6 +31,10 @@
     </div>
 
     <div class="display" id="display">
+      <div class="fx" id="fx" hidden>
+        <div class="fx-top"><span class="fx-tag">VND</span><span class="fx-rate" id="fxRateTxt"></span></div>
+        <b class="fx-val" id="fxVal">0 ₫</b>
+      </div>
       <div class="expr" id="expr" aria-live="polite"></div>
       <div class="result" id="result"></div>
     </div>
@@ -42,6 +46,7 @@
       <button class="ibtn" id="btnCopy" type="button" title="Sao chép kết quả" aria-label="Sao chép kết quả">
         <svg viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>
       </button>
+      <button class="ibtn fxbtn" id="btnFx" type="button" title="Đổi tiền Tệ → VND" aria-label="Chế độ đổi tiền Tệ sang tiền Việt">¥</button>
       <span class="sp"></span>
       <button class="ibtn" id="btnBack" type="button" title="Xoá 1 ký tự (giữ để xoá hết)" aria-label="Xoá 1 ký tự">
         <svg viewBox="0 0 24 24"><path d="M21 5H9l-7 7 7 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z"/><path d="m17 9-6 6M11 9l6 6"/></svg>
@@ -69,6 +74,8 @@
         What's new</button>
     </div>
     <div class="upd-status" id="updStatus"></div>
+    <div class="group-title">Đổi tiền</div>
+    <label class="row"><span>Tỷ giá: 1 ¥ =</span><span class="rate-in"><input type="number" id="optRate" inputmode="decimal" min="1" step="1"> ₫</span></label>
     <div class="group-title">Tuỳ chọn</div>
     <label class="row toggle"><span>Rung nhẹ khi bấm phím</span><input type="checkbox" id="optVibrate"></label>
     <div class="foot-credit">Created by Mondiro</div>

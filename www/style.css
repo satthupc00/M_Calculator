@@ -48,6 +48,22 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 .tools{display:flex;align-items:center;gap:4px;padding:0 10px 6px;margin:0 8px;border-bottom:1px solid var(--line);flex:0 0 auto}
 .tools .sp{flex:1}
 
+/* đổi tiền */
+.fx{align-self:flex-start;margin-bottom:auto;margin-top:6px;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--warn);
+  border-radius:12px;padding:8px 14px;max-width:100%;animation:pop .32s var(--ease-spring)}
+.fx[hidden]{display:none}
+.fx-top{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted)}
+.fx-tag{font-weight:800;color:var(--warn);letter-spacing:.5px}
+.fx-val{display:block;font-size:24px;font-weight:700;color:#fff;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.fx-on .expr:not(.empty)::before{content:'¥ ';color:var(--warn);font-size:.6em;vertical-align:.25em}
+.fxbtn{font-size:22px;font-weight:800}
+.fxbtn.on{color:var(--warn);background:#3A3222}
+.hi .v{font-size:14px;color:var(--warn);font-weight:600;margin-top:1px}
+.rate-in{display:flex;align-items:center;gap:6px;color:var(--muted)}
+.rate-in input{width:110px;height:40px;border:1px solid var(--line);border-radius:10px;background:var(--chrome);color:var(--text);font:600 16px Roboto,system-ui;
+  text-align:right;padding:0 10px;user-select:text;-webkit-user-select:text}
+.rate-in input:focus{outline:0;border-color:var(--red);box-shadow:0 0 0 3px rgba(229,56,59,.18)}
+
 /* bàn phím */
 .pad{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:14px 16px 30px;flex:0 0 auto}
 .k{border:0;border-radius:50%;aspect-ratio:1;width:100%;background:var(--key);color:#fff;font-weight:700;font-size:34px;line-height:1;
